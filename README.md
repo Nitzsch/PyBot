@@ -11,10 +11,10 @@ The robot was build with left-over parts of an old c’t-Bot from 2006. Please d
 ## Status
 Please note that this code is still not finished. I am still working on : 
 
-*Mapping: 
+* Mapping: 
 the drive-to is not working correct if the robot has to go left or right. The problem seems to be a bigger one. I noticed that the transformation of the opti-flow-sensor-frame to the robot-middle-frame is still bugy. Currently thats my task for the next week. 
 
-*View: 
+* View: 
 The view app sometimes crashes. I Do not know if it is a problem of the view code itself (to big, to lousy coded) or if the pi does not like it to do all the stuff it has to if we look at the view. 
 The view acitvates not only all the deamons of the robot itself, but also the map, the cam and stream, but also a lot of dynamic graphics for the frames. I need to refactor this as a hole. More classes? Less classes? Break it into more pieces? I will try to solve this. 
 Big problem with it: 
