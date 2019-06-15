@@ -1,5 +1,8 @@
 # PyBot
-Framework of a Raspberry Pi Robot written in Python for private use
+Framework of a Raspberry Pi Robot written in Python for private use for this Robot: 
+
+<img src="https://cdn.website-editor.net/5eacb7d2f6da4c0dab9b3c16306e15f4/dms3rep/multi/tablet/robot.jpg" width="200" height="300">
+
 
 ## Motivation
 This Project is my Bachelor-Thesis in Computer Science (University of Tuebingen, Germany). 
