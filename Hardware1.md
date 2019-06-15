@@ -20,12 +20,12 @@ For the Odometry! And it works. Even after that long it reacts to a resolution o
 ## The Engine: 
 Faulhaber 2619 SR 006 DC-Motor (5-6V). Made in Germany. Why should they ever fail? 
 
-##L293D Chip
+## L293D Chip
 Still working, still in use. 
 
 ## Most annoying
 C’t – Bot used a plug-in cable that was lost and is not on the market anymore. No way to change any of the code on the robot. It was used for a PhD in the 2006s and then left to die. 
 
-##And now? 
+## And now? 
 I had to think about new Sensors, that would fulfill modern Algorithms and – maybe – were able to use some cable I could plug into my laptop. 
 So thatstuff can be found here: [Hardware to future](Hardware2.md)
