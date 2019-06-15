@@ -1,5 +1,5 @@
 # Hardware
-![C't-Bot](https://cdn.website-editor.net/5eacb7d2f6da4c0dab9b3c16306e15f4/dms3rep/multi/tablet/Ctbot_jetzt.jpg =400x600 )
+![C't-Bot](https://cdn.website-editor.net/5eacb7d2f6da4c0dab9b3c16306e15f4/dms3rep/multi/tablet/Ctbot_jetzt.jpg| 400x600 )
 Or say hello to… what is this?! The 80ies?
 Maybe not. 
 It is called C’t-Bot. A robot created by the computer magazine C’t. It was widly known in Germany, back when people read papers. Yeah, I know. Papers. 
