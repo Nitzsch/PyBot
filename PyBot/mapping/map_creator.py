@@ -12,18 +12,19 @@ Stuff thats done:
 
 """
 import drive_by_mouse as driver
+import time
 
 
 def check_surroundings(rob,m):
     #first add left, then right, then front.
     # this order is maintained for mapping. the next node is always last added
     # so with this the rob will prefer order front > right >left
-    if(rob.distance_left.value > m.resolution):
+    if(rob.distance_left.value > 10): #m.resolution):
         m.addPos(int(rob.x_pos.value), int(rob.y_pos.value) -1, True)
     else:
         m.addPos(int(rob.x_pos.value), int(rob.y_pos.value) -1, False)
 
-    if (rob.distance_right.value > m.resolution):
+    if (rob.distance_right.value > 10): #m.resolution):
         m.addPos(int(rob.x_pos.value), int(rob.y_pos.value) +1, True)
     else:
         m.addPos(int(rob.x_pos.value), int(rob.y_pos.value) +1, False)
@@ -39,7 +40,10 @@ def start(rob, m):
     check_surroundings(rob,m)
     #then go into while loop while all is checked.
     while len(m.unvisitedNodes) > 0:
+        time.sleep(0.1)
+        m.prettyPrint()
         next_to_check = m.unvisitedNodes.pop()
+        print(next_to_check)
         # got to the node with driver
         drive = driver.drive_to(rob,m, next_to_check)
         # returns true if everything is ok

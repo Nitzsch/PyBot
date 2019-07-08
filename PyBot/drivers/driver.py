@@ -30,7 +30,7 @@ def backward(t=0.1,s_left=100,s_right=100):
 def backward_worker(t=0.1,s_left=100,s_right=100):
 	motor1.clockwise(speed=s_right)
 	motor2.clockwise(speed=s_left)
-	time.sleep(t)
+	time.sleep(t - 0.00005)
 	stop()
 
 def forward(t=0.1,s_left=85,s_right=100):
@@ -41,7 +41,7 @@ def forward(t=0.1,s_left=85,s_right=100):
 def forward_worker(t=0.1,s_left=80,s_right=100):
 	motor1.anticlockwise(speed=s_right)
 	motor2.anticlockwise(speed=s_left)
-	time.sleep(t)
+	time.sleep(t - 0.00005)
 	stop()
 
 def rightturn(t=0.1,s_left=80,s_right=100):
@@ -52,7 +52,7 @@ def rightturn(t=0.1,s_left=80,s_right=100):
 def rightturn_worker(t=0.1,s_left=100,s_right=100):
 	motor1.clockwise(speed=s_right)
 	motor2.anticlockwise(speed=s_left)
-	time.sleep(t)
+	time.sleep(t - 0.00005)
 	stop()
 
 def leftturn(t=0.1,s_left=100,s_right=100):
@@ -63,7 +63,7 @@ def leftturn(t=0.1,s_left=100,s_right=100):
 def leftturn_worker(t=0.1,s_left=100,s_right=100):
 	motor1.anticlockwise(speed=s_right)
 	motor2.clockwise(speed=s_left)
-	time.sleep(t)
+	time.sleep(t - 0.00005)
 	stop()
 	
 def stop():

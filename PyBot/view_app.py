@@ -38,6 +38,7 @@ import mapping.map as RMap
 class Application:
     def __init__(self, output_path = "./"):
         global rob
+        global m
         """ Initialize application which uses OpenCV + tkinter. It displays
             a video stream in a tkinter window and stores current snapshot on disk """
         self.vs = cv2.VideoCapture(0) # capture video frames, 0 is your default video camera
@@ -168,60 +169,82 @@ class Application:
         self.y_Pos_other_Data_Label = tk.Label(self.other_Data_Frame, textvariable=self.y_Pos_other_Data_Label_txtVar)
         self.y_Pos_other_Data_Label.grid(column=0, row=1,sticky="n" + "e" + "s" + "w", padx=5, pady=5)
         
-        self.dy_other_Data_Label_txtVar = tk.StringVar()
-        self.dy_other_Data_Label = tk.Label(self.other_Data_Frame, textvariable=self.dy_other_Data_Label_txtVar)
-        self.dy_other_Data_Label.grid(column=3, row=1,sticky="n" + "e" + "s" + "w", padx=5, pady=5)
-        
-        self.dx_other_Data_Label_txtVar = tk.StringVar()
-        self.dx_other_Data_Label = tk.Label(self.other_Data_Frame, textvariable=self.dx_other_Data_Label_txtVar)
-        self.dx_other_Data_Label.grid(column=3, row=0,sticky="n" + "e" + "s" + "w", padx=5, pady=5)
-        
         self.yaw_Winkel_other_Data_Label_txtVar = tk.StringVar()
         self.yaw_Winkel_other_Data_Label = tk.Label(self.other_Data_Frame, textvariable=self.yaw_Winkel_other_Data_Label_txtVar)
         self.yaw_Winkel_other_Data_Label.grid(column=1, row=0, sticky="n" + "e" + "s" + "w", padx=5, pady=5)
-
-        self.other_Robo_other_Data_Label_txtVar = tk.StringVar()
-        self.other_Robo_other_Data_Label = tk.Label(self.other_Data_Frame, textvariable=self.other_Robo_other_Data_Label_txtVar)
-        self.other_Robo_other_Data_Label.grid(column=1, row= 1,sticky="n" + "e" + "s" + "w", padx=5, pady=5)
 
 
         # ------------------------------------------------------------------------
         # set Widgets in Map Data
         # ------------------------------------------------------------------------
         # def all the button functions:
-
-        def start_mapping_Fun():
-            m = RMap.Map(robot)
-            m.startMapping()
-
-        def reset_mapping():
-            pass
+        def startMapping():
+            global m    
+            m.startMapping()   
+        
+        def resetMapping():
+            global m
+            global rob
+            m.resetMapping(rob)
+            m.prettyPrint()
+    
+        
+        def addEmptyMap():
+            global m
+            m.addEmptySquare(20)
+            m.prettyPrint()   
+        
+        def addEmptyMap2():
+            global m
+            m.addSquare(20)
+            m.prettyPrint()   
+            
         def shutdown():
             from subprocess import call
             call("sudo shutdown -P now", shell=True)
 
-        def drive_xy(x, y):
-            pass
-            
+        def drive_xy(x,y):
+            global m
+            m.drive_to(x,y) 
+             
+
         def drive_forward():
-            robot.driver.forward()
+            global rob    
+            rob.forward(0.1)
+            global m
+            m.prettyPrint()
 
         def drive_backward():
-            robot.driver.backward()
+            global rob    
+            rob.backward(0.1)
+            global m
+            m.prettyPrint()
 
         def drive_left():
-            robot.driver.leftturn()
-            
+            global rob    
+            rob.leftturn(0.1)
+            global m
+            m.prettyPrint()
 
         def drive_right():
-            robot.driver.rightturn()
+            global rob
+            rob.rightturn(0.1)
+            global m
+            m.prettyPrint()
 
         def drive_circle():
-            robot.driver.circle()
+            global rob
+            rob.circle()
+            global m
+            m.prettyPrint()
 
         def drive_square():
-            robot.driver.square()
+            global rob
+            global m
+            rob.square()
+            m.prettyPrint()
         
+
                                 
         # map
         self.map_Img = ImageTk.PhotoImage(Image.open("test.png"))
@@ -229,15 +252,21 @@ class Application:
         self.map_Img_Label.grid(sticky="n" + "e" + "s" + "w")
 
         # Fun-buttons
-        self.start_mapping_Button = tk.Button(self.fun_Frame, text="Start Mapping", command=start_mapping_Fun)
+        self.start_mapping_Button = tk.Button(self.fun_Frame, text="Start Mapping", command=startMapping )
         self.start_mapping_Button.grid(row=0, column=0)
 
         self.shutdown_Button = tk.Button(self.fun_Frame, text="shutdown Pi", command=shutdown)
         self.shutdown_Button.grid(row=0, column=2)
 
-        self.reset_Mapping_Button = tk.Button(self.fun_Frame, text="reset Mapping", command=reset_mapping)
+        self.reset_Mapping_Button = tk.Button(self.fun_Frame, text="reset Mapping", command=resetMapping )
         self.reset_Mapping_Button.grid(row=0, column=1)
-
+        
+        self.add_Mapping_Button = tk.Button(self.fun_Frame, text="add empty Square", command=addEmptyMap )
+        self.add_Mapping_Button.grid(row=1, column=0)
+        
+        self.add_Mapping_Button2 = tk.Button(self.fun_Frame, text="add filled Square", command=addEmptyMap2 )
+        self.add_Mapping_Button2.grid(row=1, column=1)
+        
         # drive xy-Labels and buttons
         self.drive_xy_Label = tk.Label(self.drive_xy_Frame, text="Drive to Pos:")
         self.drive_xy_Label.grid(row=0, column=0)
@@ -253,10 +282,10 @@ class Application:
         self.drive_x_Entry.grid(row=1, column=1)
         self.drive_y_Entry.grid(row=2, column=1)
 
-        self.go_xy_Button = tk.Button(self.drive_xy_Frame, text="Go", command=drive_xy(self.drive_x_Entry.get(), self.drive_y_Entry.get()))
+        self.go_xy_Button = tk.Button(self.drive_xy_Frame, text="Go", command=lambda: drive_xy(int(self.drive_x_Entry.get()), int(self.drive_y_Entry.get())) )
         self.go_xy_Button.grid(row=2, column=2, sticky="n" + "e" + "s" + "w")
 
-        # Drive Buttons : Functions need implementation!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
         self.drive_forward_Button = tk.Button(self.drive_Frame, text="Forward", command=drive_forward)
         self.drive_forward_Button.grid(row=0, column=0, sticky="n" + "e" + "s" + "w")
 
@@ -293,10 +322,8 @@ class Application:
             self.panel.imgtk = imgtk  # anchor imgtk so it does not be deleted by garbage-collector
             self.panel.config(image=imgtk)  # show the image
             
-        
-        self.dx_other_Data_Label_txtVar.set("Dx: %s "% rob.dx.value)
-        self.dy_other_Data_Label_txtVar.set("Dy: %s"% rob.dy.value)
-        self.other_Robo_other_Data_Label_txtVar.set("Other Robot seen? %s" % False)
+        self.y_Pos_other_Data_Label_txtVar.set("y-Pos: %s" %rob.y_pos.value)
+        self.x_Pos_other_Data_Label_txtVar.set("x-Pos: %s" %rob.x_pos.value)
         self.front_Dist_Label_txtVar.set("front: %s" %rob.distance_front.value)
         self.left_Dist_Label_txtVar.set("left: %s"% rob.distance_left.value)
         self.right_Dist_Label_txtVar.set("right: %s"% rob.distance_right.value)
@@ -307,11 +334,13 @@ class Application:
         self.wheel_right_Dist_Label_txtVar.set("wheel right: %s"% rob.wheel_encoder_right.value)
         self.wheel_left_Dist_Label_txtVar.set("wheel left: %s" % rob.wheel_encoder_left.value)
         self.yaw_Winkel_other_Data_Label_txtVar.set("yaw angle: %s"% rob.yaw_angle.value)
-        self.root.after(30, self.video_loop)  # call the same function after 30 milliseconds
-        self.y_Pos_other_Data_Label_txtVar.set("y-Pos: %s" %rob.y_pos.value)
-        self.x_Pos_other_Data_Label_txtVar.set("x-Pos: %s" %rob.x_pos.value)
         
+        self.map_Img = ImageTk.PhotoImage(Image.open("test.png"))
+        self.map_Img_Label.configure(image = self.map_Img)
+        self.map_Img_Label.image = self.map_Img 
 
+        self.root.after(30, self.video_loop)  # call the same function after 30 milliseconds
+        
     def destructor(self):
         self.root.destroy()
         self.vs.release()  # release web camera
@@ -322,7 +351,12 @@ ap = argparse.ArgumentParser()
 ap.add_argument("-o", "--output", default="./",
     help="path to output directory to store snapshots (default: current folder")
 args = vars(ap.parse_args())
-rob = robot.Pybot()
+
+# construct roboter and map
+rob = robot.Pybot("view")
+m = RMap.Map(rob)
+m.prettyPrint()
+
 # start the app
 pba = Application(args["output"])
 pba.root.mainloop()

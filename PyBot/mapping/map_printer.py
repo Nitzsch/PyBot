@@ -34,14 +34,17 @@ def printer(m, rob_path=[], planned_path=[]):
     pixels = image.load()
     for i in rob_path:
         pixels[i] = 0
-    pixels = image.load()
+
     for i in planned_path:
         pixels[i] = (50)
+        
+    #if image.size[0] >= int(m.rob.x_pos.value) + m.lowX  and image.size[1] >= int(m.rob.y_pos.value) + m.lowY :
+        #pixels[(int(m.rob.x_pos.value) + m.lowX , int(m.rob.y_pos.value) + m.lowY)] = 200
+
 
 
     image = image.resize([350,350],Image.NEAREST)
     filename = "test.png"
     image.save(filename)
-    image.show()
 
 

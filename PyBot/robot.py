@@ -36,7 +36,11 @@ class Pybot:
 	make no sense, second: the pi cant handle them. It will crash fast and hard. 
 	
 	"""
-	def __init__(self):
+	def __init__(self, name = "Pybot"):
+		#map resolution
+		self.resolution = 1
+		self.name = name 
+		self.circle_value = 768
 		#distance vars
 		self.distance_front = multiprocessing.Value("i",0)
 		self.distance_left = multiprocessing.Value("i",0)
@@ -104,24 +108,27 @@ class Pybot:
 	def distance_sonar_daemon(self,lock_distance_sonar,par):
 		while True:
 			with lock_distance_sonar:
+				#there is time build in between the sensing to prevent interference between the sensors
+				#this is held pretty short
 				self.distance_front.value = distance_sonar_driver.distance("front")
+				time.sleep(0.05)
 				self.distance_left.value = distance_sonar_driver.distance("left")
 				self.distance_right.value = distance_sonar_driver.distance("right")
-				time.sleep(0.1)
+				time.sleep(0.05)
 				
 	def distance_IF_daemon(self, lock_distance_IF,par):
 		while True:
 			with lock_distance_IF:
 				self.distance_IF_left.value = distance_infrared_driver.distance_channels("left")
 				self.distance_IF_right.value = distance_infrared_driver.distance_channels("right")
-				time.sleep(0.1)
+				time.sleep(0.05)
 	
 	def cliff_daemon(self,lock_cliff,par):
 		while True:
 			with lock_cliff:
 				self.cliff_left.value = IF_Sensors_driver.cliff_left()
 				self.cliff_right.value = IF_Sensors_driver.cliff_right() 
-				time.sleep(0.1)
+				time.sleep(0.05)
 	
 	def wheel_daemon(self,lock_wheel,par):
 		GPIO.add_event_detect(32, GPIO.BOTH, callback=lambda channel, s = self: self.if_sens_worker_left(s))
@@ -139,12 +146,11 @@ class Pybot:
 	def yaw_angel_daemon(self,lock_yaw,par):
 		while True:
 			with lock_yaw:
-				old_yaw_angle = self.yaw_angle.value
-				self.yaw_angle.value += acc_driver.yaw()
-				self.yaw_angle.value = self.yaw_angle.value %216
-				self.yaw_angle_dif.value = old_yaw_angle - self.yaw_angle.value
-				time.sleep(0.2)
-	
+				self.yaw_angle.value += acc_driver.yaw() 	
+				self.yaw_angle.value = self.yaw_angle.value % self.circle_value
+				time.sleep(0.05)
+				
+
 		#this function is a multiprocess and works as a daemon
         # updates the values of x,y infitly
 	def x_y_multiproc(self,lock,par):
@@ -163,34 +169,36 @@ class Pybot:
 		with lock:
 			while True:
 				yaw = self.yaw_angle.value
-				#bring yaw angle from 216 circle of mpu6080 to 360 circle for calculation
-				yaw = yaw * 360 /216
+				#bring yaw angle from 764 circle of mpu6080 to 360 circle for calculation
+				yaw = yaw * 360 /self.circle_value
 				# get yaw from deg to rad
 				yaw = (math.pi / 180) * yaw
 				#get the changes since last iteration and reset the values for dx, dy
+				# scale dx and dy to 1 cm by dividing with 170
 				dx = self.dx.value 
-				dy = self.dy.value 
+				dy = self.dy.value / (170*self.resolution)
+				
 				self.dx.value = 0
 				self.dy.value = 0
 				
-				x = self.x_pos.value
-				y = self.y_pos.value
+				x_new = (dx*math.cos(yaw) - dy*math.sin(yaw) )/ (170*self.resolution)
+				y_new = (dx* math.sin(yaw) + dy*math.cos(yaw)) / (170*self.resolution)
 				
-				x_new = (dx*math.cos(yaw) - dy*math.sin(yaw)) /170
-				y_new = (dx* math.sin(yaw) + dy*math.cos(yaw)) /170
-	
-	
-				self.x_pos.value = x_new + x
-				self.y_pos.value = y_new + y
-				time.sleep(0.1)
+				self.x_pos.value = x_new + self.x_pos.value
+				self.y_pos.value = y_new + self.y_pos.value
 
-
+				time.sleep(0.05)
+				
 	def forward(self, t = 0.001):
-		driver.forward_worker(t)
+		driver.forward(t)
 	def leftturn(self, t = 0.001):
 		driver.leftturn(t)
 	def rightturn(self, t = 0.001):
 		driver.rightturn(t)
 	def backward(self, t = 0.001):
 		driver.backward(t)
+	def circle (self):
+		driver.circle()
+	def square(self):
+		driver.square()		
 

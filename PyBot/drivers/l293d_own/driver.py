@@ -6,9 +6,10 @@ from __future__ import print_function
 from collections import namedtuple
 from threading import Thread
 from time import sleep
-
+import RPi.GPIO as GPIO
 from config import Config
-
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BOARD)
 
 def v_print(string):
     """
@@ -22,24 +23,6 @@ def v_print(string):
     return False
 
 
-# Import GPIO
-try:
-    import RPi.GPIO as GPIO
-except ImportError:
-    GPIO = None
-    Config.test_mode = True
-    v_print(
-        "Can't import RPi.GPIO; test mode has been enabled:\n"
-        "http://l293d.rtfd.io/en/latest/user-guide/configuration/#test-mode")
-
-if not Config.test_mode:
-    GPIO.setwarnings(False)
-
-# Set GPIO mode
-if not Config.test_mode:
-    pin_num = Config.pin_numbering
-    #v_print('Setting GPIO mode: {}'.format(pin_num))
-    GPIO.setmode(getattr(GPIO, pin_num))
 
 pins_in_use = Config.pins_in_use  # Lists pins in use (all motors)
 
@@ -81,44 +64,46 @@ class DC(object):
         for pin in self.motor_pins:
             if not Config.test_mode:
                 GPIO.setup(pin, GPIO.OUT)
+    try:
+        def drive_motor(self, direction=1, duration=None, wait=False, speed=100):
+            """
+            Method called by other functions to drive L293D via GPIO
+            """
+            self.check()
 
-    def drive_motor(self, direction=1, duration=None, wait=False, speed=100):
-        """
-        Method called by other functions to drive L293D via GPIO
-        """
-        self.check()
-
-        if not speed:
-            speed = 0
-        if isinstance(speed, int):
+            if not speed:
+                speed = 0
+            if isinstance(speed, int):
             # If speed is an integer, change it to a tuple
-            speed = (speed, speed)
+                speed = (speed, speed)
         # Unpack speed into PWM, this works even if a PWM tuple was passed in
-        speed = PWM(*speed)
+            speed = PWM(*speed)
 
-        if self.reversed:
-            direction *= -1
-        if not Config.test_mode:
-            if direction == 0:  # Then stop motor
-                self.pwm.stop()
-            else:  # Spin motor
-                # Create a PWM object to control the 'enable pin' for the chip
-                self.pwm = GPIO.PWM(self.motor_pins[0], speed.freq)
-                # Set first direction GPIO level
-                GPIO.output(self.motor_pins[direction], GPIO.HIGH)
-                # Set second direction GPIO level
-                GPIO.output(self.motor_pins[direction * -1], GPIO.LOW)
-                # Start PWM on the 'enable pin'
-                self.pwm.start(speed.cycle)
-        # If duration has been specified, sleep then stop
-        if duration is not None and direction != 0:
-            stop_thread = Thread(target=self.stop, args=(duration,))
-            # Sleep in thread
-            stop_thread.start()
-            if wait:
-                # If wait is true, the main thread is blocked
-                stop_thread.join()
-
+            if self.reversed:
+                direction *= -1
+            if not Config.test_mode:
+                if direction == 0:  # Then stop motor
+                    self.pwm.stop()
+                else:  # Spin motor
+                    # Create a PWM object to control the 'enable pin' for the chip
+                    self.pwm = GPIO.PWM(self.motor_pins[0], speed.freq)
+                    # Set first direction GPIO level
+                    GPIO.output(self.motor_pins[direction], GPIO.HIGH)
+                    # Set second direction GPIO level
+                    GPIO.output(self.motor_pins[direction * -1], GPIO.LOW)
+                    # Start PWM on the 'enable pin'
+                    self.pwm.start(speed.cycle)
+            # If duration has been specified, sleep then stop
+            if duration is not None and direction != 0:
+                stop_thread = Thread(target=self.stop, args=(duration,))
+                # Sleep in thread
+                stop_thread.start()
+                if wait:
+                    # If wait is true, the main thread is blocked
+                    stop_thread.join()
+    except Exception:
+        pass
+        
     def pins_string_list(self):
         """
         Return readable list of pins
@@ -145,14 +130,20 @@ class DC(object):
         """
         Spin the motor clockwise
         """
-        self.__move_motor(1, duration, wait, 'spinning clockwise', speed)
-
+        try:
+            self.__move_motor(1, duration, wait, 'spinning clockwise', speed)
+        except Exception:
+            pass
+            
     def anticlockwise(self, duration=None, wait=False, speed=100):
         """
         Spin the motor anticlockwise
         """
-        self.__move_motor(-1, duration, wait, 'spinning anticlockwise', speed)
-
+        try:
+            self.__move_motor(-1, duration, wait, 'spinning anticlockwise', speed)
+        except Exception:
+            pass
+               
     def stop(self, after=0):
         """
         Stop the motor. If 'after' is specified, sleep for amount of time
@@ -184,19 +175,6 @@ class DC(object):
 
 
 PWM = namedtuple("PWM", ["freq", "cycle"])
-
-
-class Motor(object):
-    def __init__(self, pin_a=0, pin_b=0, pin_c=0):
-        raise DeprecationWarning('The Motor class has been deprecated. '
-                                 'Please use \'DC\' or \'Stepper\' instead.')
-
-
-class Stepper(object):
-    def __init__(self):
-        raise FutureWarning('Stepper motors are not yet supported. Go to '
-                            'https://github.com/jamesevickery/l293d/issues/20 '
-                            'for more info')
 
 
 def pins_are_valid(pins, force_selection=True):

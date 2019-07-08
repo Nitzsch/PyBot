@@ -16,6 +16,7 @@ the map is created in co -work with the file map_creator.
 import random
 import map_creator
 import map_printer 
+import drive_by_mouse as driver
 
 class Map:
     def __init__(self, rob, name = None, positionRobot = (0,0)):
@@ -29,7 +30,7 @@ class Map:
         self.lowY = 0
         self.maxX = 0
         self.maxY = 0
-        self.resolution = 5
+        self.resolution = rob.resolution
 
     def addRandomValues(self,x,y):
         for i in range(x):
@@ -113,6 +114,25 @@ class Map:
     #start mapping
     def startMapping(self):
         map_creator.start(self.rob, self)
+        
+    #pretty print map
+    def prettyPrint(self, rob_path =[], planned_path=[]):
+        map_printer.printer(self, rob_path, planned_path)
+        
+    #drive to
+    def drive_to(self, x, y):
+        if not self.d:
+            pass
+        else:
+            driver.drive_to(self.rob, self, (x,y))
+            self.prettyPrint()
+        
+    def resetMapping(self, rob):
+        self.d ={}
+        rob.x_pos.value = 0
+        rob.y_pos.value = 0
+        rob.yaw_angle.value = 0
+
 
 
     #writes the map to a txt file at path location
